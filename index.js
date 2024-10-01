@@ -15,5 +15,6 @@ app.listen(3000, () => {
   console.log('Order service running on port 3000');
 });
 
-// Import payment service to start consuming messages from RabbitMQ
+// Import both payment and inventory services to start consuming messages
+require('./inventoryService');
 require('./paymentService');

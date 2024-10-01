@@ -7,7 +7,7 @@ async function consumeOrderCreatedEvents() {
 
     // Declare a topic exchange and bind a queue to it
     const exchange = 'order_exchange';
-    const queue = 'payment_queue';
+    const queue = 'inventory_queue';
     await channel.assertExchange(exchange, 'topic', { durable: true });
     await channel.assertQueue(queue, { durable: true });
 
@@ -15,15 +15,15 @@ async function consumeOrderCreatedEvents() {
     const routingKey = 'order.created';
     await channel.bindQueue(queue, exchange, routingKey);
 
-    console.log('Payment Service waiting for OrderCreated events...');
+    console.log('Inventory Service waiting for OrderCreated events...');
     
     // Consume messages from the queue
     channel.consume(queue, (msg) => {
       if (msg !== null) {
         const event = JSON.parse(msg.content.toString());
-        console.log('Payment Service received event:', event);
+        console.log('Inventory Service received event:', event);
 
-        processPayment(event.payload.orderId, event.payload.totalAmount);
+        reserveStock(event.payload.orderId, event.payload.items);
         channel.ack(msg);
       }
     });
@@ -32,8 +32,8 @@ async function consumeOrderCreatedEvents() {
   }
 }
 
-function processPayment(orderId, amount) {
-  console.log(`Processing payment for Order: ${orderId}, Amount: ${amount}`);
+function reserveStock(orderId, items) {
+  console.log(`Reserving stock for Order: ${orderId}, Items: ${items}`);
 }
 
 // Start consuming events
